@@ -13,6 +13,8 @@ hero_n<-graph_from_data_frame(hero_df, directed = F)
 
 
 
+
+
 ##Explo
 # Subset vertices and edges
 V(hero_n)
@@ -27,6 +29,10 @@ hero_n <- simplify(hero_n, remove.loops=T)
 E(hero_n)$weight
 is.weighted(hero_n)
 is.simple(hero_n)
+# Count number of edges
+gsize(hero_n)
+# Count number of vertices
+gorder(hero_n)
 
 igraph::is.connected(hero_n) #do we have a connected graph?
 composant<-decompose.graph(hero_n)
@@ -41,6 +47,8 @@ plot(hero_n, layout = layout.drl(hero_n), vertex.label=NA)
 
 
 
+
+
 ##general infos about this graph
 #graph density
 dens <- edge_density(hero_n)
@@ -50,7 +58,7 @@ dens
 # Get the average path length of the graph g
 dist <- mean_distance(hero_n, directed = FALSE)
 # Generate n random graphs
-n<-20
+n<-40
 gl <- vector('list', n)
 for(i in 1:n){
   gl[[i]] <- erdos.renyi.game(n = gorder(hero_n), p.or.m = dens, type = "gnp")
@@ -82,7 +90,7 @@ hist(graph.strength(hero_n),col="blue",xlab="VertexStrength",ylab="Frequency",ma
 
 ##who is more important (more central)
 # Calculate the degree
-all_deg <- degree(hero_n, mode = c("all"))
+all_deg <- igraph::degree(hero_n)
 which.max(all_deg)
 #top 5 most popular
 top<-mean(all_deg)+11.65*sd(all_deg)
@@ -90,7 +98,7 @@ length(all_deg[all_deg>top])
 all_deg[all_deg>top]
 
 # Calculate betweenness of each vertex
-betw <- betweenness(hero_n, directed = F)
+betw <- igraph::betweenness(hero_n, directed = F)
 which.max(betw)
 #top 5 most popular
 top<-mean(betw)+15*sd(betw)
@@ -112,7 +120,7 @@ plot(g_america, vertex.label=NA)
 
 A<-get.adjacency(hero_n,sparse=FALSE)
 g<-network::as.network.matrix(A)
-#sna::gplot.target(g,degree(g),main="Degree",circ.lab=FALSE,circ.col="skyblue",usearrows=FALSE,edge.col="darkgray") #computer too slow
+sna::gplot.target(g,degree(g),main="Degree",circ.lab=FALSE,circ.col="skyblue",usearrows=FALSE,edge.col="darkgray") #computer too slow
 
 
 
@@ -121,7 +129,7 @@ g<-network::as.network.matrix(A)
 
 ##Do we have structures like cliques?
 #table(sapply(cliques(hero_n),length)) #computer too slow
-
+#cliques(hero_n)
 ##Are there communities? Graph partitioning
 #using randomwalks
 net_comm<-walktrap.community(hero_n, steps = 5)
@@ -173,7 +181,7 @@ V(composant[[4]])
 #not really...
 
 #is it a "normal" number of communities?
-n<-10 #higher if faster computer
+n<-30 #higher if faster computer
 nv<-vcount(hero_n)
 ne<-ecount(hero_n)
 degs<-igraph::degree(hero_n)
