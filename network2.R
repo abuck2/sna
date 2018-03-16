@@ -7,6 +7,8 @@ hero_df <- read.csv("hero-network.csv")
 #head(nodes_df)
 library(igraph)
 library(threejs)
+library(sna)
+library(network)
 hero_n<-graph_from_data_frame(hero_df, directed = F)
 
 
@@ -25,7 +27,13 @@ hero_n <- simplify(hero_n, remove.loops=T)
 E(hero_n)$weight
 is.weighted(hero_n)
 is.simple(hero_n)
-is.connected(hero_n)
+
+igraph::is.connected(hero_n) #do we have a connected graph?
+composant<-decompose.graph(hero_n)
+table(sapply(composant,vcount)) # one main graph
+cut_vert<-articulation.points(hero_n)#do we have articulation point?
+length(cut_vert)#not that many
+
 summary(hero_n)
 plot(hero_n, layout = layout.drl(hero_n), vertex.label=NA)
 
@@ -66,6 +74,12 @@ hist(graph.strength(hero_n),col="blue",xlab="VertexStrength",ylab="Frequency",ma
 #big difference, while most are low, some are pretty high
 
 
+
+
+
+
+
+
 ##who is more important (more central)
 # Calculate the degree
 all_deg <- degree(hero_n, mode = c("all"))
@@ -96,10 +110,19 @@ g.ec$vector[g.ec$vector>top]
 g_america <- make_ego_graph(hero_n, diameter(hero_n), nodes = 'CAPTAIN AMERICA', mode = c("all"))[[1]]
 plot(g_america, vertex.label=NA)
 
+A<-get.adjacency(hero_n,sparse=FALSE)
+g<-network::as.network.matrix(A)
+#sna::gplot.target(g,degree(g),main="Degree",circ.lab=FALSE,circ.col="skyblue",usearrows=FALSE,edge.col="darkgray") #computer too slow
 
 
 
-##Are there communities?
+
+
+
+##Do we have structures like cliques?
+#table(sapply(cliques(hero_n),length)) #computer too slow
+
+##Are there communities? Graph partitioning
 #using randomwalks
 net_comm<-walktrap.community(hero_n, steps = 5)
 sizes(net_comm)
