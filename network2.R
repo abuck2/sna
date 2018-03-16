@@ -167,3 +167,40 @@ subam <- subgraph.edges(graph=net_c, eids=which(vertex_attr(net_c)$community==m)
 sum(vertex_attr(net_c)$community==m)==gsize(subam) #ok
 plot(subam, vertex.label.color = "black",edge.color = 'black',layout=layout.fruchterman.reingold(subam))
 
+#similar to the disconnected part of the graph?
+gorder(composant[[2]])
+V(composant[[4]])
+#not really...
+
+#is it a "normal" number of communities?
+n<-10 #higher if faster computer
+nv<-vcount(hero_n)
+ne<-ecount(hero_n)
+degs<-igraph::degree(hero_n)
+
+num.comm.rg<-numeric(n)
+#fixed sized simulation
+for(i in (1:n)){
+  g.rg<-erdos.renyi.game(nv,ne,type="gnm")
+  c.rg<-fastgreedy.community(g.rg)
+  num.comm.rg[i]<-length(c.rg)
+}
+
+#degree sequence simulation
+num.comm.grg<-numeric(n)
+for(i in (1:n)){
+  g.grg<-degree.sequence.game(degs,method="vl")
+  c.grg<-fastgreedy.community(g.grg)
+  num.comm.grg[i]<-length(c.grg)
+}
+
+#results
+rslts<-c(num.comm.rg,num.comm.grg)
+indx<-c(rep(0,n),rep(1,n))
+counts<-table(indx,rslts)/n
+barplot(counts, beside=TRUE, col=c("blue","red"), xlab="Number of Communities",ylab="Relative Frequency",legend=c("Fixed Size", "Fixed Degree Sequence"))
+
+## We are clearly on the higher side
+
+
+
